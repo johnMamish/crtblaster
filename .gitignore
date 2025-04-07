@@ -1,0 +1,7 @@
+# This directory is used by the server to store videos
+data/*
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
