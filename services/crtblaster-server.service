@@ -1,0 +1,9 @@
+[Unit]
+Description=CRTBlaster Server
+After=network-online.target
+
+[Service]
+ExecStart=/home/john/projects/videoserver/
+
+[Install]
+WantedBy=multi-user.target
