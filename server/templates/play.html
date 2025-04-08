@@ -1,0 +1,49 @@
+<html>
+    <head>
+        <script src="{{url_for('static', filename='play.js')}}"></script>
+        <style>
+            .thumbnail {padding: 10px 10px 10px 10px;}
+            .thumbnail_selected {border-style: dashed; border-radius: 3px;}
+            
+            table {
+                padding: 10px 10px 10px 10px;
+                <!--border: 1px solid black;-->
+                table-layout: fixed;
+                width: 100%;
+            }
+
+        </style>
+    </head>
+
+    <body>
+        <h2>CRTBlaster</h2>
+        <span><a href="{{url_for('index')}}">Upload</a></span>  <span>Play</span> <br/>
+        <div style="padding: 10px;"><table> <tr>
+            <td style="width: 75%; text-align: center;">
+                <button type="button" id="videoDelete" onclick="deleteVideo(selected_video_name)">Delete Video</button>
+                <button type="button" id="playlistAddItem" onclick="addVideoToPlaylist(selected_video_name)">Play Now</button>
+            </td>
+            <td>
+                <!--
+                <button type="button" id="playlistClear" onclick="clearPlaylist()">Clear</button>
+                <button type="button" id="playlistShuffle" onclick="togglePlaylistShuffle()">Shuffle</button>
+                <button type="button" id="playlistPlay" onclick="playPlaylist()">Play</button>
+                <button type="button" id="playlistStop" onclick="stopPlaylist()">Stop</button>
+                <button type="button" id="playlistRemoveItem" onclick="removeItemFromPlaylist(selected_playlist_item)">Remove</button>
+-->
+            </td>
+        </tr> </table></div>
+        <table>
+            <tr>
+                <td style="width: 80%; vertical-align: top;">
+                    <h3 id="title">These videos are available to play:</h3>
+                    <div id="videoList"></div>
+                    <br/>
+                </td>
+                <td style="vertical-align: top;">
+                    <!--<h3> active playlist </h3>-->
+                </td>
+            </tr>
+        </table>
+    </body>
+</html>

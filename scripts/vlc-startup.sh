@@ -6,4 +6,4 @@
 # https://n0tablog.wordpress.com/2009/02/09/
 # controlling-vlc-via-rc-remote-control-interface-using-a-unix-domain-socket-and-no-programming/
 
-DISPLAY=:0 vlc --extraintf=rc --rc-host=localhost:14484 --fullscreen
+DISPLAY=:0 vlc --extraintf=rc --rc-host=localhost:14484 #--fullscreen

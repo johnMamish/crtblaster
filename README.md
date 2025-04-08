@@ -5,13 +5,43 @@ for playing on a TV.
 
 In principle, there are a few products similar to this on the market (Android TV boxes, etc), but they 
 are more focused on streaming media for consumption. CRTBlaster is meant for easily looping queues of video
-for decor and art installations.
+for decor, art installations, and performances.
 
 A web interface is exposed on port 80 that lets anyone on the local wi-fi network connect to upload videos
 and select which ones are playing.
 
 ## Design
-The 
+### Web interface
+#### Data uploading
+At /index, there's a data upload page which lets users upload one video at a time.
+
+Uploaded videos will automatically be re-encoded on the server for optimal playback.
+At a minimum, this means:
+  - Re-encoding in h264
+  - Adjustment of video size to 720x480.
+
+The user can also optionally specify
+  - Conversion from color to black / white
+  - During resolution change whether video should be stretched or whether vbars / hbars should be added
+
+#### Playlist queueing 
+At /play, there's a page that lets users browse all uploaded videos and select which ones are playing.
+It also controls looping.
+
+We do have an option to allow users to toggle to the 'next' video in the playlist before the current
+one is done playing.
+
+### Data storage
+Videos are stored in the 'data' folder.
+
+When videos are uploaded, they may not be in the right format. CRTBlaster will process any uploaded video
+to make sure that its aspect ratio and encoding are correct.
+
+Newly uploaded videos go in `data/new_videos` while they undergo processing.
+
+Once a video has been processed, it goes in `data/processed_videos`. 
+Videos that are successfully processed are deleted from `new_videos` and optionally backed up in `data/prev_videos`.
+If a video fails processing for whatever reason, it's put in `failed_videos`.
 
 ## Starting CRTBlaster
 For CRTBlaster run, the following processes need to be started

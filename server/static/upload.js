@@ -6,5 +6,5 @@ function uploadVideo() {
     formData.append("videoname", document.getElementById("videoName").value);
     fetch('/upload/video', {method: "POST", body: formData});
 
-    alert("todo: uploading video");
+    alert("Uploading video. This may take a minute.");
 }

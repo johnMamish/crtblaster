@@ -14,6 +14,7 @@ import time
 input_dir = "./data/new_videos"
 output_dir = "./data/processed_videos"
 backup_dir = "./data/prev_videos"
+thumbnail_dir = "./server/static/thumbs"
 
 supported_extensions = ["mp4", "avi", "mkv"]
 
@@ -52,10 +53,19 @@ while True:
             except Exception as e:
                 print(e)
 
+        # Make a thumbnail for the video and put it in the thumbnail dir
+        fname = os.path.splitext(os.path.basename(f))[0]
+        subprocess.run(["ffmpeg",  "-y",
+                        "-i", f"{output_dir}/{f}", 
+                        "-ss", "00:00:01.000", 
+                        "-vframes", "1", 
+                        f"{thumbnail_dir}/{fname}.png"])
+
         # Move the file to the backup dir now that it's processed
         subprocess.run(["mv", f"{input_dir}/{f}", f"{backup_dir}/{f}"])
-
+        
         # Optional: play the file via the VLC interface
+        continue
         try:
             output_file = f"{backup_dir}/{f}"
             time.sleep(1)
