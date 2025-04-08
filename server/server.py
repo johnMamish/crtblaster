@@ -102,13 +102,13 @@ def play_video():
         time.sleep(0.1)
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.connect(("localhost", 14484))
-            time.sleep(0.1)
+            time.sleep(0.05) 
             sock.sendall(f"clear\r\n".encode("utf-8"))
-            time.sleep(0.1)
+            time.sleep(0.05)
             sock.sendall(f"add {os.path.abspath(output_file)}\r\n".encode("utf-8"))
-            time.sleep(0.1)
+            time.sleep(0.05)
             sock.sendall(f"play\r\n".encode("utf-8"))
-            time.sleep(0.1)
+            time.sleep(0.05)
             sock.sendall(f"repeat on\r\n".encode("utf-8"))
     except Exception as e:
         print(e)

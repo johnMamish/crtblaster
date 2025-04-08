@@ -15,15 +15,15 @@ async function renderVideoThumbnails(videos) {
         console.log(video["name"]);
         
         // create a new thumbnail and append it
-        let s = document.createElement("div");
-        s.classList.add("thumbnail");
-        s.addEventListener('click', function () {
+        let thumbnail = document.createElement("table");
+        thumbnail.classList.add("thumbnail");
+        thumbnail.addEventListener('click', function () {
             let videoName = video["name"];
-            let me = s;
+            let me = thumbnail;
             function selectButton() {
                 console.log(videoName);
-                for (let thumbnail of thumbnailDiv.children) {
-                    thumbnail.classList.remove("thumbnail_selected");
+                for (let t of thumbnailDiv.children) {
+                    t.classList.remove("thumbnail_selected");
                 }
                 me.classList.add("thumbnail_selected");
                 selected_video_name = video["name"];
@@ -35,11 +35,27 @@ async function renderVideoThumbnails(videos) {
         img.setAttribute('src', video["thumbnail_url"]);
         img.setAttribute('width', 120);
         img.setAttribute('height', 80);
-        s.appendChild(img);
         
-        s.appendChild(document.createElement("br"));
-        s.appendChild(document.createTextNode(video["name"]));
-        thumbnailDiv.appendChild(s);
+        label = document.createTextNode(video["name"]);
+        
+        imgcell = document.createElement('td');
+        imgcell.setAttribute('width', 130);
+        imgcell.appendChild(img);
+        tr1 = document.createElement('tr');
+        tr1.appendChild(imgcell);
+        imgcell.classList.add("thumbnail_label");
+        thumbnail.appendChild(tr1);
+        
+        labelcell = document.createElement('td');
+        labelcell.appendChild(label);
+        tr2 = document.createElement('tr');
+        labelcell.classList.add("thumbnail_label");
+        tr2.appendChild(labelcell);
+        thumbnail.appendChild(tr2);
+        
+        thumbnail.setAttribute('style', 'width: 140px');
+        
+        thumbnailDiv.appendChild(thumbnail);
     }
 }
 

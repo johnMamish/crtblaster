@@ -2,16 +2,20 @@
     <head>
         <script src="{{url_for('static', filename='play.js')}}"></script>
         <style>
-            .thumbnail {padding: 10px 10px 10px 10px;}
-            .thumbnail_selected {border-style: dashed; border-radius: 3px;}
+            .thumbnail {border: 3px solid transparent; padding: 10px 10px 10px 10px;}
+            .thumbnail_selected {border: 3px dashed black; border-radius: 13px;}
             
             table {
                 padding: 10px 10px 10px 10px;
-                <!--border: 1px solid black;-->
+                border: 0px solid black;
                 table-layout: fixed;
                 width: 100%;
             }
-
+            
+            td.thumbnail_label {
+                border: 0px solid black;
+                text-align: center;
+            }
         </style>
     </head>
 
@@ -37,7 +41,7 @@
             <tr>
                 <td style="width: 80%; vertical-align: top;">
                     <h3 id="title">These videos are available to play:</h3>
-                    <div id="videoList"></div>
+                    <div id="videoList" style="display: flex; flex-wrap: wrap;"></div>
                     <br/>
                 </td>
                 <td style="vertical-align: top;">
