@@ -4,16 +4,17 @@ var selected_video_name = null;
 // This variable holds the name of the currently selected item in the playlist
 var selected_playlist_item = null;
 
-// This variable maintains the list of video names
+// This variable maps video names to thumbnail urls
+var thumbnail_url_dict = null;
 
 // This function takes in an array of video descriptors (name, thumbnail) and renders them
 async function renderVideoThumbnails(videos) {
-    console.log(videos);
     let thumbnailDiv = document.getElementById("videoList");
     thumbnailDiv.replaceChildren();
+    thumbnail_url_dict = new Object();
     for (let video of videos) {
-        console.log(video["name"]);
-        
+        thumbnail_url_dict[video["name"]] = video["thumbnail_url"];
+
         // create a new thumbnail and append it
         let thumbnail = document.createElement("table");
         thumbnail.classList.add("thumbnail");
@@ -39,11 +40,11 @@ async function renderVideoThumbnails(videos) {
         label = document.createTextNode(video["name"]);
         
         imgcell = document.createElement('td');
-        imgcell.setAttribute('width', 130);
+        imgcell.classList.add("thumbnail_image");
         imgcell.appendChild(img);
         tr1 = document.createElement('tr');
         tr1.appendChild(imgcell);
-        imgcell.classList.add("thumbnail_label");
+        //imgcell.classList.add("thumbnail_label");
         thumbnail.appendChild(tr1);
         
         labelcell = document.createElement('td');
@@ -53,10 +54,58 @@ async function renderVideoThumbnails(videos) {
         tr2.appendChild(labelcell);
         thumbnail.appendChild(tr2);
         
-        thumbnail.setAttribute('style', 'width: 140px');
+        // hacky to manually specify these
+        thumbnail.setAttribute('style', 'width: 160px; height: 120px');
         
         thumbnailDiv.appendChild(thumbnail);
     }
+}
+
+// The playlist is represented by a json object:
+// {
+//     now_playing: string     // name of the currently playing video
+//     playlist: array of strings    // name of all videos in playlist in order
+// }
+// Given a json object representing a playlist, 
+async function renderPlaylist(playlist_json) {
+    let playlistDiv = document.getElementById("playList");
+    playlistDiv.replaceChildren();
+
+    for (let videoname of playlist_json.playlist) {
+        // create a new playlist entry and append it
+        let playlistEntry = document.createElement("table");
+        let row = document.createElement('tr');
+
+        img = document.createElement("img");
+        img.setAttribute('src', thumbnail_url_dict[videoname]);
+        img.setAttribute('width', 120);
+        img.setAttribute('height', 80);
+        
+        
+        label = document.createTextNode(videoname);
+        
+        imgcell = document.createElement('td');
+        imgcell.appendChild(img);
+        imgcell.setAttribute('style', 'border: 1px black;');
+        imgcell.setAttribute('width', 125);
+        
+        labelcell = document.createElement('td');
+        labelcell.setAttribute('style', 'text-align: left; border: 1px black;');
+        labelcell.appendChild(label);
+        
+        row.appendChild(imgcell);
+        row.appendChild(labelcell);
+        
+        playlistEntry.appendChild(row);
+
+        playlistDiv.appendChild(playlistEntry);
+    }
+}
+
+async function fetchAndRenderPlaylist() {
+    let response = await fetch("/playlist/getcurrentplaylist");
+    let json = await response.json();
+    renderPlaylist(json);
 }
 
 async function fetchAndRenderThumbs() {
@@ -78,7 +127,11 @@ document.addEventListener("DOMContentLoaded", function () {
         fetchAndRenderThumbs();
     }
 
-    //let playlist_event_source = new EventSource('');
+    let playlist_event_source = new EventSource('/playlist/playlistevents');
+    playlist_event_source.onmessage = async function() {
+        console.log("playlist updated");
+        fetchAndRenderPlaylist();
+    }
 });
 
 ///////////////////////////////////////////////

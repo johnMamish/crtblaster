@@ -4,6 +4,8 @@ import base64
 import os
 import subprocess
 import socket
+import queue
+from threading import Lock
 
 app = Flask(__name__)
 
@@ -11,6 +13,35 @@ NEW_VIDEO_DIR="../data/new_videos"
 PROCESSED_VIDEO_DIR="../data/processed_videos"
 THUMBNAIL_DIR="./static/thumbs"
 DEFAULT_THUMBNAIL="./static/default_thumbnail.png"
+
+playlist_mutex = None
+playlist_update_queue = None
+playlist = {"videos": [], "now_playing": None}
+
+def process_new_video():
+    """ This function does the processing required to render a new video
+    """
+    pass
+
+def playlist_daemon():
+    """ This thread accepts playlists consisting of names 
+    """
+    while True:
+        time.sleep(0.1)
+        
+        # TODO: get current playlist ordering from VLC
+        
+        # Check queue for new playlist ordering.
+        # Should be a json object with an array of videos 
+        new_playlist = None
+        try:
+            new_playlist = playlist_request_queue.get(block=False)
+            
+            # We changed the queue
+        except Exception as e:
+            pass
+        
+        
 
 # This is the upload page.
 # The user submits uploaded video via this page.
@@ -91,9 +122,22 @@ def videoinfo():
     # Send video data
     return jsonify(videos)
 
+current_video = None
+# Gets the currently active playlist.
+# Includes updates from 
+@app.route('/playlist/getcurrentplaylist')
+def getcurrentplaylist():
+    print(current_video)
+    if (current_video is None):
+        return jsonify({"now_playing": "", "playlist": []})
+    else:
+        return jsonify({"now_playing": current_video, "playlist": [current_video, current_video, current_video, current_video, current_video, current_video, current_video, current_video, current_video]})
+
 @app.route('/playlist/playvideo', methods=['POST'])
 def play_video():
     d = request.get_json()
+    global current_video 
+    current_video = d["name"]
     print("play_video: " + d["name"])
     videoname = d["name"].replace("../", "")
 
@@ -115,6 +159,14 @@ def play_video():
 
     return ""
 
+# Updates the current playlist
+# Accepts a 
+@app.route('/playlist/update')
+def playlist_add_video():
+    # 
+    d = request.get_json()
+    return ""
+    
 
 # This endpoint deletes videos
 @app.route('/upload/deletevideo', methods=['POST'])
@@ -128,7 +180,7 @@ def delete_video():
     subprocess.run(["rm", f"{PROCESSED_VIDEO_DIR}/{videoname}.mp4"])
     return ""
 
-# Listens for changes in the uploaded videos and playlist.
+# Listens for changes in the uploaded videos.
 # Very jenky.
 def video_upload_event_stream():
     prev_processed_vids = os.listdir(PROCESSED_VIDEO_DIR)
@@ -142,11 +194,22 @@ def video_upload_event_stream():
         prev_processed_vids = processed_vids
         prev_new_vids = new_vids
 
+# Listens for changes in the current playlist.
+def playlist_changed_event_stream():
+    while True:
+        time.sleep(1)
+        yield "data: update\n\n"
+
+@app.route('/playlist/playlistevents')
+def playlistevents():
+    return Response(playlist_changed_event_stream(), mimetype="text/event-stream")
+
 # This SSE stream sends a notice whenever the video library or playlist has been updated
 @app.route('/upload/videouploadevents')
 def videouploadevents():
     return Response(video_upload_event_stream(), mimetype="text/event-stream")
 
 if __name__ == '__main__':
+    playlist_mutex = Lock()
     app.debug = True
     app.run(threaded=True, host="0.0.0.0")
