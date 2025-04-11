@@ -2,7 +2,7 @@
     <head>
         <script src="{{url_for('static', filename='upload.js')}}"></script>
     </head>
-    
+
     <body>
         <h2>CRTBlaster</h2>
         <span>Upload</span>  <span><a href="{{url_for('play')}}">Play</a></span> <br/>
@@ -10,6 +10,6 @@
         <input type="file" id="videoSelector" name="selectvideo" /> <br/>
         <input type="text" id="videoName" name="videoName" placeholder="Enter video name" />
         <button id="uploadButton" onclick="uploadVideo()"> upload </button>
+        <div id="uploadStatus"></div>
     </body>
 </html>
-    

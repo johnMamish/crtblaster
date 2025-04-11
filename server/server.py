@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 from flask import Flask, render_template, request, redirect, url_for, jsonify, Response
 import time
 import base64
@@ -24,24 +26,22 @@ def process_new_video():
     pass
 
 def playlist_daemon():
-    """ This thread accepts playlists consisting of names 
+    """ This thread accepts playlists consisting of names
     """
     while True:
         time.sleep(0.1)
-        
+
         # TODO: get current playlist ordering from VLC
-        
+
         # Check queue for new playlist ordering.
-        # Should be a json object with an array of videos 
+        # Should be a json object with an array of videos
         new_playlist = None
         try:
             new_playlist = playlist_request_queue.get(block=False)
-            
+
             # We changed the queue
         except Exception as e:
             pass
-        
-        
 
 # This is the upload page.
 # The user submits uploaded video via this page.
@@ -56,9 +56,9 @@ def index():
 # TODO: just put the conversion in here instead of in a seperate script
 @app.route('/upload/video', methods=['POST'])
 def upload_file():
-    print(request)
-    print(f"video name is {request.form['videoname']}")
+    print(f"Got uploaded video {request.form['videoname']} with request to save.")
     print(request.files['video'])
+    print("Saving video.")
     request.files['video'].save(f"{NEW_VIDEO_DIR}/{request.form['videoname']}.mp4")
     return ""
 
@@ -88,7 +88,7 @@ def videoinfo():
     # Get the names of all fully processed videos.
     pending_video_names = os.listdir(NEW_VIDEO_DIR)
     processed_video_names = [name for name in os.listdir(PROCESSED_VIDEO_DIR) if name not in pending_video_names]
-    
+
     # Sort them by most recently modified
     processed_videos_filepaths = sort_files_by_recent([f"{PROCESSED_VIDEO_DIR}/{f}" for f in processed_video_names])
     pending_videos_filepaths = sort_files_by_recent([f"{NEW_VIDEO_DIR}/{f}" for f in pending_video_names])
@@ -101,14 +101,14 @@ def videoinfo():
         # Get the video's name. The video's unique user-assigned name is its filename.
         videoname = os.path.splitext(os.path.basename(videofile))[0]
         processed_video_names.append(videoname)
-        
+
         # Retrieve and encode the thumbnail
         thumbname = f"{THUMBNAIL_DIR}/{videoname}.png"
         print(f"videoinfo: {thumbname}")
         thumbnail_url = f"static/thumbs/{videoname}.png"
 
         videos.append({"name": videoname, "thumbnail_url": thumbnail_url, "processing": False})
-    
+
     # Get all videos not yet in the processed videos folder
     for videofile in pending_videos_filepaths:
         videoname = os.path.splitext(os.path.basename(videofile))[0]
@@ -118,13 +118,13 @@ def videoinfo():
 
             thumbnail_url = f"static/default_thumbnail.png"
             videos.append({"name": f"{videoname} (processing)", "thumbnail_url": thumbnail_url, "processing": True})
-    
+
     # Send video data
     return jsonify(videos)
 
 current_video = None
 # Gets the currently active playlist.
-# Includes updates from 
+# Includes updates from
 @app.route('/playlist/getcurrentplaylist')
 def getcurrentplaylist():
     print(current_video)
@@ -136,7 +136,7 @@ def getcurrentplaylist():
 @app.route('/playlist/playvideo', methods=['POST'])
 def play_video():
     d = request.get_json()
-    global current_video 
+    global current_video
     current_video = d["name"]
     print("play_video: " + d["name"])
     videoname = d["name"].replace("../", "")
@@ -146,7 +146,7 @@ def play_video():
         time.sleep(0.1)
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.connect(("localhost", 14484))
-            time.sleep(0.05) 
+            time.sleep(0.05)
             sock.sendall(f"clear\r\n".encode("utf-8"))
             time.sleep(0.05)
             sock.sendall(f"add {os.path.abspath(output_file)}\r\n".encode("utf-8"))
@@ -160,13 +160,13 @@ def play_video():
     return ""
 
 # Updates the current playlist
-# Accepts a 
+# Accepts a
 @app.route('/playlist/update')
 def playlist_add_video():
-    # 
+    #
     d = request.get_json()
     return ""
-    
+
 
 # This endpoint deletes videos
 @app.route('/upload/deletevideo', methods=['POST'])
@@ -174,7 +174,7 @@ def delete_video():
     d = request.get_json()
     print("delete_video: " + d["name"])
     videoname = d["name"].replace("../", "")
-    
+
     # TODO: double check that video exists and that its in the dirs
     subprocess.run(["rm", f"{THUMBNAIL_DIR}/{videoname}.png"])
     subprocess.run(["rm", f"{PROCESSED_VIDEO_DIR}/{videoname}.mp4"])
@@ -198,6 +198,7 @@ def video_upload_event_stream():
 def playlist_changed_event_stream():
     while True:
         time.sleep(1)
+        print("hey!!!")
         yield "data: update\n\n"
 
 @app.route('/playlist/playlistevents')
@@ -212,4 +213,8 @@ def videouploadevents():
 if __name__ == '__main__':
     playlist_mutex = Lock()
     app.debug = True
-    app.run(threaded=True, host="0.0.0.0")
+
+    #
+    GBYTE = (1 << 30)
+    app.config['MAX_CONTENT_LENGTH'] = GBYTE >> 1
+    app.run(threaded=True, host="0.0.0.0", port=5000)
